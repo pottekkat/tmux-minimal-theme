@@ -25,6 +25,8 @@ apply_minimal_theme() {
     local icon_date=$(get_tmux_option "@minimal_theme_date_icon" "")
     local icon_clock=$(get_tmux_option "@minimal_theme_clock_icon" "")
     local icon_battery=$(get_tmux_option "@minimal_theme_battery_icon" "")
+    local icon_git=$(get_tmux_option "@minimal_theme_git_icon" "")
+    local icon_command=$(get_tmux_option "@minimal_theme_git_command" "")
 
     # Status bar setup
     tmux set-option -g status on
@@ -32,10 +34,10 @@ apply_minimal_theme() {
     tmux set-option -g status-interval 3
     tmux set-option -g status-justify left
 
-    # Status bar colors and style
-    tmux set-option -g status-style "bg=$bg_color,fg=$text_color"
+    # Status bar colors and style (transparent background)
+    tmux set-option -g status-style "bg=default,fg=$text_color"
     tmux set-option -g status-left-length 100
-    tmux set-option -g status-right-length 100
+    tmux set-option -g status-right-length 150
 
     # Pane borders
     tmux set-option -g pane-border-style "fg=$border_color"
@@ -45,25 +47,24 @@ apply_minimal_theme() {
     tmux set-option -g message-style "bg=$bg_color,fg=$text_color,bold"
     tmux set-option -g message-command-style "bg=$bg_color,fg=$text_color,bold"
 
-    # Window status format
-    tmux set-option -g window-status-format "#[fg=$inactive_color,bg=$bg_color] #I:#W "
-    tmux set-option -g window-status-current-format "#[fg=$active_color,bg=$bg_color,bold] #I:#W "
+    # Window status format (transparent background)
+    tmux set-option -g window-status-format "#[fg=$inactive_color,bg=default] #I:#W "
+    tmux set-option -g window-status-current-format "#[fg=$active_color,bg=default,bold] #I:#W "
     tmux set-option -g window-status-separator ""
 
     # Status left (session name)
-    tmux set-option -g status-left "#[fg=$accent_color,bold]$icon_session  #S #[fg=$inactive_color]│ "
+    tmux set-option -g status-left "#[fg=$accent_color,bold]$icon_session  #S  "
 
-    # Status right with system info
+    # Status right with system info (macOS compatible)
     local status_right="\
-#[fg=$accent_color]$icon_dir #[fg=$text_color]#([ #{pane_current_path} = \$HOME ] && echo '~' || basename #{pane_current_path}) \
-#[fg=$inactive_color]│ \
-#[fg=$accent_color]$icon_memory #[fg=$text_color]#(free | awk '/^Mem/ { printf(\"%.0f%%\", \$3/\$2 * 100 - 0.5) }' ) \
-#[fg=$inactive_color]│ \
-#[fg=$accent_color]$icon_date #[fg=$text_color]#(date +%d) \
-#[fg=$inactive_color]│ \
-#[fg=$accent_color]$icon_clock #[fg=$text_color]#(date +%H:%M) \
-#[fg=$inactive_color]│ \
-#[fg=$accent_color]$icon_battery #[fg=$text_color]#(cat /sys/class/power_supply/BAT*/capacity 2>/dev/null || echo 'N/A')% "
+#[fg=$accent_color]$icon_dir #[fg=$text_color]#([ #{pane_current_path} = \$HOME ] && echo '~' || basename #{pane_current_path})  \
+#{?#(cd '#{pane_current_path}' && git rev-parse --is-inside-work-tree 2>/dev/null),#[fg=$accent_color]$icon_git #[fg=$text_color]#(cd '#{pane_current_path}' && git branch --show-current 2>/dev/null)  ,}\
+#[fg=$accent_color]$icon_command #[fg=$text_color]#{pane_current_command}"
+# Commented out system info
+# #[fg=$accent_color]$icon_memory #[fg=$text_color]#(top -l 1 -s 0 | awk '/PhysMem/ {print \$2}' | sed 's/M.*/M/')  \
+# #[fg=$accent_color]$icon_date #[fg=$text_color]#(date +%d)  \
+# #[fg=$accent_color]$icon_clock #[fg=$text_color]#(date +%H:%M)  \
+# #[fg=$accent_color]$icon_battery #[fg=$text_color]#(pmset -g batt | awk '/InternalBattery/ {gsub(/;.*/, \"\", \$3); print \$3}' || echo 'N/A')"
 
     tmux set-option -g status-right "$status_right"
 
