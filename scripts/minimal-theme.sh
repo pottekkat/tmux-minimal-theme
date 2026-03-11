@@ -53,7 +53,7 @@ apply_minimal_theme() {
     tmux set-option -g window-status-separator ""
 
     # Status left (session name)
-    tmux set-option -g status-left "#[fg=$accent_color,bold]$icon_session  #S  "
+    tmux set-option -g status-left "#[fg=$accent_color,bold]$icon_session #S  "
 
     # Status right with system info (macOS compatible)
     local status_right="\
